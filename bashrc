@@ -38,3 +38,35 @@ twlp() {
 alias wlp="twlp; printf '\n'"
 alias wlpn="printf '\n'; twlp; printf '\n'"
 alias wlpnn="printf '\n\n'; twlp; printf '\n'"
+
+lfzf () {
+    local depth=1
+    local path="$(pwd)"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -d)
+                depth="$2"
+                shift 2
+                ;;
+            -d[0-9]*)
+                if [[ "$1" =~ -d([0-9]+) ]]; then
+                    depth="${BASH_REMATCH[1]}"
+                    shift
+                fi
+                ;;
+            --depth)
+                depth="$2"
+                shift 2
+                ;;
+            *)
+                path="$1"
+                shift
+                ;;
+        esac
+    done
+
+    local abs_path="$(realpath $path)"
+
+    locate --regex "^${abs_path}/([^/]+/?){1,$depth}$" | fzf
+}
