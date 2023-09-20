@@ -35,9 +35,22 @@ twlp() {
     wl-paste | awk 'BEGIN{RS=ORS=""} {gsub(/^[[:space:]]+|[[:space:]]+$/, ""); print}'
 }
 
-alias wlp="twlp; printf '\n'"
-alias wlpn="printf '\n'; twlp; printf '\n'"
-alias wlpnn="printf '\n\n'; twlp; printf '\n'"
+wlp() {
+    twlp
+    printf '\n'
+}
+
+wlpn() {
+    printf '\n'
+    twlp
+    printf '\n'
+}
+
+wlpnn() {
+    printf '\n\n'
+    twlp
+    printf '\n'
+}
 
 lfzf () {
     local depth=1
