@@ -1,4 +1,4 @@
-# .bashrc
+# kak:filetype=sh
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then

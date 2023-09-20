@@ -1,0 +1,15 @@
+add-highlighter global/ number-lines -min-digits 4
+
+# set global disabled_hooks .*-indent
+
+define-command set-ruby-filetype %{
+    set-option buffer filetype ruby
+    set-option buffer indentwidth 2
+    set-option buffer tabstop 2
+}
+
+hook global BufCreate .*\.rb %{
+    set-ruby-filetype
+}
+
+hook global BufOpenFile .* modeline-parse
