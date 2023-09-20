@@ -31,23 +31,18 @@ unset rc
 
 alias filteredlogs="sudo journalctl -f | awk '!(/slack\[.*\]: \[.*\] info:/)'"
 
-twlp() {
-    wl-paste | awk 'BEGIN{RS=ORS=""} {gsub(/^[[:space:]]+|[[:space:]]+$/, ""); print}'
-}
-
 wlp() {
-    twlp
-    printf '\n'
+    wl-paste | awk 'BEGIN { non_empty=0; buffer="" } 
+                    { if (NF) { if (non_empty) print buffer; print; non_empty=1; buffer="" } 
+                      else { buffer = buffer "\n" } }'
 }
 
 wlpn() {
     printf '\n'
-    twlp
-    printf '\n'
+    wlp
 }
 
 wlpnn() {
     printf '\n\n'
-    twlp
-    printf '\n'
+    wlp
 }
