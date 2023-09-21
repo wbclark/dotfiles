@@ -1,4 +1,4 @@
-# .bash_profile
+# kak:filetype=sh
 
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
