@@ -1,0 +1,44 @@
+#!/bin/bash
+
+PROJECTS_ROOT="/home/wclark/Projects"
+
+# Check for the -i flag
+if [[ "$1" == "-i" ]]; then
+    # If -i is passed, use lfzf to select a directory
+    source ~/.bashrc.d/lfzf
+    shift  # Remove the -i flag from the arguments
+    selected_directory=$(lfzf "$@")  # Pass remaining arguments to lfzf
+    if [ -z "$selected_directory" ]; then
+        echo "No directory selected. Exiting."
+        exit 1
+    fi
+else
+    # Otherwise, construct the path based on the provided project name
+    project_name="$1"
+    if [ -z "$project_name" ]; then
+        echo "Please provide a project name or use the -i flag to interactively select one."
+        exit 1
+    fi
+    selected_directory="${PROJECTS_ROOT}/${project_name}"
+    if [ ! -d "$selected_directory" ]; then
+        echo "The specified project directory does not exist: $selected_directory"
+        exit 1
+    fi
+fi
+
+# CD into the selected directory
+cd "$selected_directory" || { echo "Failed to change to directory: $selected_directory"; exit 1; }
+
+# Extract the project name from the selected directory
+project_name=$(basename "$selected_directory")
+
+# Set local variables based on the project name
+KAKOUNE_SERVER_NAME="${project_name}_server"
+TERMINAL_WINDOW_NAMES=("${project_name}_left" "${project_name}_right")
+
+echo "Selected directory: $selected_directory"
+echo "Project name: $project_name"
+echo "Kakoune server name: $KAKOUNE_SERVER_NAME"
+echo "Terminal window names: ${TERMINAL_WINDOW_NAMES[@]}"
+
+# TODO: Continue with the process of setting up the IDE
