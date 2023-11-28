@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Get a list of sink names
+sinks=($(pactl list short sinks | awk '{print $2}'))
+
+# Get the current default sink
+current_sink=$(pactl get-default-sink)
+
+# Find the index of the current sink in the array
+for i in "${!sinks[@]}"; do
+   if [[ "${sinks[$i]}" = "$current_sink" ]]; then
+       current_index=$i
+       break
+   fi
+done
+
+# Determine the next sink (cycle through the list)
+next_index=$(( (current_index + 1) % ${#sinks[@]} ))
+
+# Set the default sink to the next one
+pactl set-default-sink "${sinks[$next_index]}"
+
+# Move all currently playing streams to the new sink
+pactl list short sink-inputs | cut -f1 | while read stream; do
+    pactl move-sink-input "$stream" "${sinks[$next_index]}"
+done
