@@ -87,6 +87,9 @@ output DP-4 pos -320 -1440 res 2560x1440
     # Lock the screen
     bindsym $mod+l exec swaylock
 
+    # Cycle audio output device
+    bindsym $mod+a exec ~/.local/bin/cycle-audio-sinks
+
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
     # Despite the name, also works for non-floating windows.
@@ -174,7 +177,7 @@ output DP-4 pos -320 -1440 res 2560x1440
     bindsym $mod+space focus mode_toggle
 
     # Move focus to the parent container
-    bindsym $mod+a focus parent
+    # bindsym $mod+a focus parent
 #
 # Scratchpad:
 #
