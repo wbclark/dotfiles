@@ -1,2 +1,3 @@
 bashrc.d/* linguist-language=Shell
 config/sway/config linguist-language=Conf
+config/waybar/config linguist-language=JSON
