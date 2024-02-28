@@ -10,3 +10,5 @@ fi
 if [ -f ~/.secrets ]; then
     source ~/.secrets
 fi
+
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
