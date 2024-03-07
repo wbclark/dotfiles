@@ -30,3 +30,5 @@ export VISUAL='kak'
 unset rc
 
 alias filteredlogs="sudo journalctl -f | awk '!(/slack\[.*\]: \[.*\] info:/)'"
+
+alias rhvpn='nmcli con up id "1 - Red Hat Global VPN"'
