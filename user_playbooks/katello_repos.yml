@@ -1,0 +1,22 @@
+---
+- hosts: all
+  tasks:
+    - name: Enable CRB
+      ansible.builtin.command: sudo dnf config-manager --set-enabled crb
+
+    - name: "Include Foreman Server Repositories"
+      ansible.builtin.include_role:
+        name: foreman_server_repositories
+        apply:
+          become: true
+      vars:
+        foreman_server_repositories_katello: true
+        foreman_server_repositories_foreman_client: true
+        # foreman_repositories_staging_source: 'stagingyum'
+        # katello_repositories_staging_source: 'stagingyum'
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ katello_dev_additional_packages }}"
+        state: present
+      become: true
