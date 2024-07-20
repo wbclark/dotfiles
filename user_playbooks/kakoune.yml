@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: install epel-release
+      ansible.builtin.yum:
+        name: epel-release
+        state: latest
+      when: ansible_distribution == "CentOS"
+    - name: install kakoune
+      ansible.builtin.yum:
+        name: kakoune
+        state: latest
+    - name: install xclip
+      ansible.builtin.yum:
+        name: xclip
+        state: latest
+#   - name: install fzf
+#     ansible.builtin.yum:
+#       name: fzf
+#       state: latest
+    - name: install nnn
+      ansible.builtin.yum:
+        name: nnn
+        state: latest

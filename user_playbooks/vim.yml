@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: install vim
+      ansible.builtin.yum:
+        name: vim
+        state: latest

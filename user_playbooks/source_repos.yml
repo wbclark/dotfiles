@@ -1,0 +1,11 @@
+---
+- hosts: all
+  tasks:
+    - name: "Setup git repositories"
+      ansible.builtin.include_role:
+        name: git_repo
+      loop: "{{ git_repositories }}"
+      loop_control:
+        loop_var: repo
+      vars:
+        git_repo_repository: "{{ repo }}"
