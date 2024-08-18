@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars:
+    foreman_proxy_content_server_group: "server-{{ inventory_hostname }}"
+    foreman_proxy_content_server: "centos9-stream-wclark-katello-devel"
+    foreman_server_repositories_katello: true
+    katello_repositories_version: nightly
+  roles:
+    - role: foreman_server_repositories
+      become: true
+    - role: etc_hosts
+      become: true
+    - role: foreman_proxy_content
+      foreman_directory: "{{ ansible_user_dir }}/foreman/config/"
+      devel: true
+      base_foreman_directory: "{{ ansible_user_dir }}/foreman/"
+    - role: foreman_installer
+      become: true
+      foreman_installer_scenario: foreman-proxy-content
+      foreman_installer_disable_system_checks: true
+      foreman_installer_options_internal_use_only:
+        - '--certs-tar-file "{{ foreman_proxy_content_certs_tar }}"'
+        - '--foreman-proxy-content-enable-ostree true'
+        - '--foreman-proxy-trusted-hosts "{{ server_fqdn }}"'
+        - '--foreman-proxy-trusted-hosts "{{ ansible_nodename }}"'
+        - '--foreman-proxy-foreman-base-url "https://{{ server_fqdn }}"'
+        - '--foreman-proxy-register-in-foreman true'
+        - '--foreman-proxy-oauth-consumer-key "{{ oauth_consumer_key }}"'
+        - '--foreman-proxy-oauth-consumer-secret "{{ oauth_consumer_secret }}"'
+        - "--no-enable-puppet"
+        - "--foreman-proxy-puppet false"
+        - "--foreman-proxy-puppetca false"
