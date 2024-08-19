@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if [ -z "$KRB5CCNAME" ]; then
+    echo "Error: KRB5CCNAME is not set."
+    exit 1
+fi
+
+if [ -z "$FIREFOX_KRB5CCNAME" ]; then
+    echo "Error: FIREFOX_KRB5CCNAME is not set."
+    exit 1
+fi
+
+BACKUP_KRB5CCNAME="${FIREFOX_KRB5CCNAME}.bak"
+
+if [ -L "$FIREFOX_KRB5CCNAME" ] || [ -e "$FIREFOX_KRB5CCNAME" ]; then
+    mv "$FIREFOX_KRB5CCNAME" "$BACKUP_KRB5CCNAME"
+    echo "Created backup $BACKUP_KRB5CCNAME"
+fi
+
+kinit "$@" || {
+    if [ $? -ne 0 ]; then
+        if [ -e "$BACKUP_KRB5CCNAME" ]; then
+            mv "$BACKUP_KRB5CCNAME" "$FIREFOX_KRB5CCNAME"
+            echo "Kinit failed. Restoring from $BACKUP_KRB5CCNAME"
+        fi
+        exit 1
+    fi
+}
+
+ln "$KRB5CCNAME" "$FIREFOX_KRB5CCNAME"
+if [ $? -eq 0 ]; then
+    echo "Created new $FIREFOX_KRB5CCNAME"
+else
+    echo "Failed to create new $FIREFOX_KRB5CCNAME"
+    if [ -e "$BACKUP_KRB5CCNAME" ]; then
+        mv "$BACKUP_KRB5CCNAME" "$FIREFOX_KRB5CCNAME"
+        echo "Restored original $FIREFOX_KRB5CCNAME"
+    fi
+    exit 1
+fi
+
+if [ -e "$BACKUP_KRB5CCNAME" ]; then
+    rm -f "$BACKUP_KRB5CCNAME"
+    echo "Removed backup at $BACKUP_KRB5CCNAME"
+fi
