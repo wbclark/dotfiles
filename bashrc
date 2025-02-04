@@ -32,3 +32,5 @@ unset rc
 alias filteredlogs="sudo journalctl -f | awk '!(/slack\[.*\]: \[.*\] info:/)'"
 
 alias rhvpn='nmcli --ask con up id "1 - Red Hat Global VPN"'
+
+alias rtree="tree --noreport -a --gitignore -I '.git|env'"
