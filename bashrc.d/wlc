@@ -28,20 +28,32 @@ wlcann() {
     _wlca_join $'\n\n'
 }
 
+_wlcr_parse_pattern_args() {
+    local flag="$1"
+    if [ -n "$2" ]; then
+        printf "%s" "$2"
+    else
+        echo "Error: $flag requires a pattern argument" >&2
+        return 1
+    fi
+}
+
 _wlcr_parse_args() {
-    local -n excludes_ref=$1
-    local -n other_args_ref=$2
-    shift 2
+    local -n includes_ref=$1
+    local -n excludes_ref=$2
+    local -n other_args_ref=$3
+    shift 3
     while [ $# -gt 0 ]; do
         case "$1" in
+            -e)
+                pattern=$(_wlcr_parse_pattern_args -e "$2") || return 1
+                includes_ref+=("$pattern")
+                shift 2
+                ;;
             -v)
-                if [ -n "$2" ]; then
-                    excludes_ref+=("$2")
-                    shift 2
-                else
-                    echo "Error: -v requires a pattern argument" >&2
-                    return 1
-                fi
+                pattern=$(_wlcr_parse_pattern_args -v "$2") || return 1
+                excludes_ref+=("$pattern")
+                shift 2
                 ;;
             *)
                 other_args_ref+=("$1")
@@ -51,24 +63,59 @@ _wlcr_parse_args() {
     done
 }
 
+_wlcr_get_initial_files() {
+    {
+        git ls-files --full-name
+        git ls-files --full-name --others --exclude-standard
+    } | sort -u
+}
+
+_wlcr_apply_includes() {
+    local -n files_ref=$1
+    local -n includes_ref=$2
+    local tmp=()
+    for file in "${files_ref[@]}"; do
+        local add=false
+        for pattern in "${includes_ref[@]}"; do
+            if echo "$file" | grep -E "$pattern" >/dev/null; then
+                add=true
+                break
+            fi
+        done
+        $add && tmp+=("$file")
+    done
+    files_ref=("${tmp[@]}")
+}
+
+_wlcr_apply_excludes() {
+    local -n files_ref=$1
+    local -n excludes_ref=$2
+    local tmp=()
+    for file in "${files_ref[@]}"; do
+        local skip=false
+        for pattern in "${excludes_ref[@]}"; do
+            if echo "$file" | grep -E "$pattern" >/dev/null; then
+                skip=true
+                break
+            fi
+        done
+        $skip || tmp+=("$file")
+    done
+    files_ref=("${tmp[@]}")
+}
+
 _wlcr_get_files() {
     local -n files_arr=$1
-    shift
-    local excludes=("$@")
-    mapfile -t files_arr < <({ git ls-files --full-name; git ls-files --full-name --others --exclude-standard; } | sort -u)
-    if [ ${#excludes[@]} -gt 0 ]; then
-        local tmp=()
-        for file in "${files_arr[@]}"; do
-            local skip=false
-            for pat in "${excludes[@]}"; do
-                if echo "$file" | grep -E "$pat" >/dev/null; then
-                    skip=true
-                    break
-                fi
-            done
-            $skip || tmp+=("$file")
-        done
-        files_arr=("${tmp[@]}")
+    local -n includes_ref=$2
+    local -n excludes_ref=$3
+    shift 3
+
+    mapfile -t files_arr < <(_wlcr_get_initial_files)
+    if [ ${#includes_ref[@]} -gt 0 ]; then
+        _wlcr_apply_includes files_arr includes
+    fi
+    if [ ${#excludes_ref[@]} -gt 0 ]; then
+        _wlcr_apply_excludes files_arr excludes
     fi
 }
 
@@ -118,13 +165,15 @@ _wlcr_check_git_repo() {
 }
 
 wlcr() {
-    local excludes=() other_args=()
-    _wlcr_parse_args excludes other_args "$@"
+    local includes=()
+    local excludes=()
+    local other_args=()
+    _wlcr_parse_args includes excludes other_args "$@"
 
     _wlcr_check_git_repo || return 1
 
     local files=()
-    _wlcr_get_files files "${excludes[@]}"
+    _wlcr_get_files files includes excludes
 
     {
         for file in "${files[@]}"; do
