@@ -40,3 +40,7 @@ wlpnn() {
     printf '\n\n'
     wlp
 }
+
+wlpk () {
+    wlp | kak
+}
