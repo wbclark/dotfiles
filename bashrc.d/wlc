@@ -150,7 +150,7 @@ _wlcr_format_file() {
         printf '```\n'
     fi
     cat "$file"
-    printf '\n```\n\n'
+    printf '```\n\n'
 }
 
 _wlcr_remove_final_newlines() {
