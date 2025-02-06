@@ -1,10 +1,10 @@
 # kak:filetype=sh
 
-wlp() {
-    wl-paste | awk '
+_wlp_trim_whitespace() {
+    awk '
     BEGIN {
         trailing_empty_lines = 0;
-        skip_leading_empty = 1;  # Initially set to skip leading empty lines
+        skip_leading_empty = 1;
     }
 
     # Skip leading lines that are empty or contain only spaces/tabs
@@ -17,7 +17,7 @@ wlp() {
         for (i=0; i<trailing_empty_lines; i++) {
             print ""
         }
-        trailing_empty_lines = 0  # Reset the counter
+        trailing_empty_lines = 0
 
         sub(/[ \t]+$/, "");  # Remove trailing spaces/tabs
         print;
@@ -26,9 +26,13 @@ wlp() {
 
     # For lines that are empty or contain only spaces/tabs
     /^[\t ]*$/ {
-        trailing_empty_lines++  # Increment the counter for each such line
+        trailing_empty_lines++
     }
     '
+}
+
+wlp() {
+    wl-paste | _wlp_trim_whitespace
 }
 
 wlpn() {

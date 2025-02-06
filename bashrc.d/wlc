@@ -9,7 +9,7 @@ _wlca_join() {
     local new old
     new=$(cat)
     old=$(wl-paste)
-    printf "%s%s%s" "$old" "$delim" "$new" | wl-copy
+    printf "%s%s%s" "$old" "$delim" "$new" | wlc
 }
 
 wlca() {
@@ -164,11 +164,10 @@ _wlcr_check_git_repo() {
     fi
 }
 
-wlcr() {
-    local includes=()
-    local excludes=()
-    local other_args=()
-    _wlcr_parse_args includes excludes other_args "$@"
+_wlcr_generate_report() {
+    local -n includes_ref=$1
+    local -n excludes_ref=$2
+    local -n other_args_ref=$3
 
     _wlcr_check_git_repo || return 1
 
@@ -179,5 +178,13 @@ wlcr() {
         for file in "${files[@]}"; do
             _wlcr_format_file "$file"
         done
-    } | _wlcr_remove_final_newlines | wlc
+    } | _wlcr_remove_final_newlines
+}
+
+wlcr() {
+    local includes=()
+    local excludes=()
+    local other_args=()
+    _wlcr_parse_args includes excludes other_args "$@"
+    _wlcr_generate_report includes excludes other_args | wlc
 }
