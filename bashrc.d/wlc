@@ -158,8 +158,8 @@ _wlcr_remove_final_newlines() {
 }
 
 _wlcr_check_git_repo() {
-    if ! git rev-parse --is-inside-work-true &>/dev/null; then
-        echo "Not inside a git repository. Exiting." >&2
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Not inside a git repository. Exiting wlcr." >&2
         return 1
     fi
 }
