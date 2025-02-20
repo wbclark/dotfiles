@@ -33,7 +33,7 @@ Let's say your project looks like this:
 
 ### Extract the files you want, format them nicely, and copy to your clipboard, all with a single shell command
 
-Use `-e PATTERN` for includes and `-v PATTERN` for excludes. For example, `wlcr -e config -v loader` to get all files matching "config" and not matching "loader", wrapping each one in a nice code block. Paste anywhere with the usual ctrl-V.
+Use `-e PATTERN` for includes, `-v PATTERN` for excludes, and `-g PATTERN` to match file contents. For example, `wlcr -e config -v loader` to get all files with paths matching "config" and not matching "loader", wrapping each one in a nice code block. Paste anywhere with the usual ctrl-V.
 
    ```
       config-example.yaml:
