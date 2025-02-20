@@ -167,7 +167,35 @@ _wlcr_get_language() {
     esac
 }
 
-_wlcr_format_file() {
+_wlcr_file_is_empty() {
+    local file="$1"
+    if [ ! -s "$1" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+_wlcr_nonempty_file_is_binary() {
+    local file="$1"
+    if grep -Iq . "$file" 2>/dev/null; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+_wlcr_format_empty_file() {
+    local file="$1"
+    printf "Empty File %s.\n\n" "$file"
+}
+
+_wlcr_format_binary_file() {
+    local file="$1"
+    printf "Binary File %s.\n\n" "$file"
+}
+
+_wlcr_format_text_file() {
     local file="$1"
     local lang="$(_wlcr_get_language "$file")"
     printf "%s:\n\n" "$file"
@@ -180,8 +208,30 @@ _wlcr_format_file() {
     printf '```\n\n'
 }
 
+_wlcr_format_file() {
+    local file="$1"
+    if _wlcr_file_is_empty "$file"; then
+        _wlcr_format_empty_file "$file"
+    else
+        if _wlcr_nonempty_file_is_binary "$file"; then
+            _wlcr_format_binary_file "$file"
+        else
+            _wlcr_format_text_file "$file"
+        fi
+    fi
+}
+
 _wlcr_remove_final_newlines() {
     sed -e ':a' -e '$!{N;ba}' -e 's/\n*$//'
+}
+
+_wlcr_format_files() {
+    local -n files_ref=$1
+    {
+        for file in "${files_ref[@]}"; do
+            _wlcr_format_file "$file"
+        done
+    } | _wlcr_remove_final_newlines
 }
 
 _wlcr_check_git_repo() {
@@ -201,12 +251,7 @@ _wlcr_generate_report() {
 
     local files=()
     _wlcr_get_files files includes excludes contents
-
-    {
-        for file in "${files[@]}"; do
-            _wlcr_format_file "$file"
-        done
-    } | _wlcr_remove_final_newlines
+    _wlcr_format_files files
 }
 
 wlcr() {
