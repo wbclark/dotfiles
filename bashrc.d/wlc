@@ -30,12 +30,11 @@ wlcann() {
 
 _wlcr_parse_pattern_args() {
     local flag="$1"
-    if [ -n "$2" ]; then
-        printf "%s" "$2"
-    else
+    if [ -z "$2" ]; then
         echo "Error: $flag requires a pattern argument" >&2
         return 1
     fi
+    printf "%s" "$2"
 }
 
 _wlcr_parse_args() {
@@ -81,14 +80,12 @@ _wlcr_apply_includes() {
     local -n includes_ref=$2
     local tmp=()
     for file in "${files_ref[@]}"; do
-        local add=false
         for pattern in "${includes_ref[@]}"; do
             if echo "$file" | grep -E "$pattern" >/dev/null; then
-                add=true
+                tmp+=("$file")
                 break
             fi
         done
-        $add && tmp+=("$file")
     done
     files_ref=("${tmp[@]}")
 }
@@ -98,14 +95,12 @@ _wlcr_apply_excludes() {
     local -n excludes_ref=$2
     local tmp=()
     for file in "${files_ref[@]}"; do
-        local skip=false
         for pattern in "${excludes_ref[@]}"; do
             if echo "$file" | grep -E "$pattern" >/dev/null; then
-                skip=true
-                break
+                continue 2
             fi
         done
-        $skip || tmp+=("$file")
+        tmp+=("$file")
     done
     files_ref=("${tmp[@]}")
 }
@@ -115,14 +110,12 @@ _wlcr_match_contents() {
     local -n contents_ref=$2
     local tmp=()
     for file in "${files_ref[@]}"; do
-        local add=false
         for pattern in "${contents_ref[@]}"; do
             if grep -I -E "$pattern" "$file" >/dev/null; then
-                add=true
+                tmp+=("$file")
                 break
             fi
         done
-        $add && tmp+=("$file")
     done
     files_ref=("${tmp[@]}")
 }
@@ -168,21 +161,11 @@ _wlcr_get_language() {
 }
 
 _wlcr_file_is_empty() {
-    local file="$1"
-    if [ ! -s "$1" ]; then
-        return 0
-    else
-        return 1
-    fi
+    [ ! -s "$1" ]
 }
 
 _wlcr_nonempty_file_is_binary() {
-    local file="$1"
-    if grep -Iq . "$file" 2>/dev/null; then
-        return 1
-    else
-        return 0
-    fi
+    ! grep -Iq . "$1" 2>/dev/null
 }
 
 _wlcr_format_empty_file() {
@@ -212,13 +195,13 @@ _wlcr_format_file() {
     local file="$1"
     if _wlcr_file_is_empty "$file"; then
         _wlcr_format_empty_file "$file"
-    else
-        if _wlcr_nonempty_file_is_binary "$file"; then
-            _wlcr_format_binary_file "$file"
-        else
-            _wlcr_format_text_file "$file"
-        fi
+        return
     fi
+    if _wlcr_nonempty_file_is_binary "$file"; then
+        _wlcr_format_binary_file "$file"
+        return
+    fi
+    _wlcr_format_text_file "$file"
 }
 
 _wlcr_remove_final_newlines() {
